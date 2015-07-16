@@ -1,2 +1,3 @@
 # Shia-Adventure
-ACTUAL CANNIBAL
+
+Get through the woods alive
