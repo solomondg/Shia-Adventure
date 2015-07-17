@@ -100,9 +100,9 @@ func (b *buffer) fillCells(xStarting, xEnding, yStarting, yEnding byte, fillChar
 func main() {
 	var mainbuffer buffer
 	mainbuffer.clearScreen()
-	mainbuffer.init(" ")
+	mainbuffer.init("#")
 	mainbuffer.clearScreen()
 	mainbuffer.clearBuffer(" ")
-	mainbuffer.fillCells(2, 6, 4, 6, fmt.Sprintf("%v", r), fmt.Sprintf("%v", d))
+	mainbuffer.fillCells(2, 6, 4, 6, fmt.Sprintf("%v ", r), fmt.Sprintf("%v ", d))
 	mainbuffer.drawFrame()
 }
