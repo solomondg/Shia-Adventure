@@ -1,7 +1,26 @@
+<<<<<<< HEAD
+/*
+ _______  __   __  ___   _______  _______  __     _______  ______   __   __  _______  __    _  _______  __   __  ______    _______
+|       ||  | |  ||   | |   _   ||       ||  |   |   _   ||      | |  | |  ||       ||  |  | ||       ||  | |  ||    _ |  |       |
+|  _____||  |_|  ||   | |  |_|  ||  _____||__|   |  |_|  ||  _    ||  |_|  ||    ___||   |_| ||_     _||  | |  ||   | ||  |    ___|
+| |_____ |       ||   | |       || |_____        |       || | |   ||       ||   |___ |       |  |   |  |  |_|  ||   |_||_ |   |___
+|_____  ||       ||   | |       ||_____  |       |       || |_|   ||       ||    ___||  _    |  |   |  |       ||    __  ||    ___|
+ _____| ||   _   ||   | |   _   | _____| |       |   _   ||       | |     | |   |___ | | |   |  |   |  |       ||   |  | ||   |___
+|_______||__| |__||___| |__| |__||_______|       |__| |__||______|   |___|  |_______||_|  |__|  |___|  |_______||___|  |_||_______|
+
+*/
+
+=======
+>>>>>>> 94ff7eb82afa3f76624587ede8e03c09802815ff
 package main
 
 import (
 	"fmt"
+<<<<<<< HEAD
+	"os"
+	"os/exec"
+=======
+>>>>>>> 94ff7eb82afa3f76624587ede8e03c09802815ff
 )
 
 const (
@@ -27,6 +46,69 @@ var (
 	d  = b_default
 )
 
+<<<<<<< HEAD
+const (
+	xSize = 32
+	ySize = 32
+)
+
+type buffer struct {
+	cells [xSize][ySize]string
+}
+
+func (b *buffer) init() {
+	var x, y int = 0, 0
+	for x = 1; x < xSize; x++ {
+		for y = 1; y < ySize; y++ {
+			b.cells[x][y] = ""
+		}
+
+	}
+}
+
+func (b *buffer) clearBuffer(fillChar string) {
+	fmt.Printf("\033[39m\033[49m")
+	var x, y int = 0, 0
+	for x = 1; x < xSize; x++ {
+		for y = 1; y < ySize; y++ {
+			b.cells[x][y] = fillChar
+		}
+	}
+}
+
+func (b *buffer) clearScreen() {
+	c := exec.Command("clear")
+	c.Stdout = os.Stdout
+	c.Run()
+}
+
+func (b *buffer) drawFrame() {
+	var x, y int
+	for x = 1; x < ySize; x++ {
+		for y = 1; y < xSize; y++ {
+			fmt.Printf(b.cells[x][y])
+		}
+		fmt.Printf("\n")
+	}
+
+}
+
+func (b *buffer) fillCells(xStarting, xEnding, yStarting, yEnding int, fillChar string) {
+	var x, y int
+	for x = xStarting; x < xEnding; x++ {
+		for y = yStarting; y < yEnding; y++ {
+			b.cells[x][y] = fillChar
+		}
+	}
+}
+
+func main() {
+	var mainbuffer buffer
+	mainbuffer.init()
+	mainbuffer.clearScreen()
+	mainbuffer.clearBuffer()
+
+=======
 /*
  _______  __   __  ___   _______  _______  __     _______  ______   __   __  _______  __    _  _______  __   __  ______    _______
 |       ||  | |  ||   | |   _   ||       ||  |   |   _   ||      | |  | |  ||       ||  |  | ||       ||  | |  ||    _ |  |       |
@@ -52,4 +134,5 @@ func main() {
 	fmt.Println(line1)
 	fmt.Println(line2)
 	fmt.Println("\033[49m")
+>>>>>>> 94ff7eb82afa3f76624587ede8e03c09802815ff
 }
