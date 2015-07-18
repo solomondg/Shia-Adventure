@@ -1,11 +1,10 @@
-/* _______  __   __  ___   _______  _______  __     _______  ______   __   __  _______  __    _  _______  __   __  ______    _______
-|       ||  | |  ||   | |   _   ||       ||  |   |   _   ||      | |  | |  ||       ||  |  | ||       ||  | |  ||    _ |  |       |
-|  _____||  |_|  ||   | |  |_|  ||  _____||__|   |  |_|  ||  _    ||  |_|  ||    ___||   |_| ||_     _||  | |  ||   | ||  |    ___|
-| |_____ |       ||   | |       || |_____        |       || | |   ||       ||   |___ |       |  |   |  |  |_|  ||   |_||_ |   |___
-|_____  ||       ||   | |       ||_____  |       |       || |_|   ||       ||    ___||  _    |  |   |  |       ||    __  ||    ___|
- _____| ||   _   ||   | |   _   | _____| |       |   _   ||       | |     | |   |___ | | |   |  |   |  |       ||   |  | ||   |___
-|_______||__| |__||___| |__| |__||_______|       |__| |__||______|   |___|  |_______||_|  |__|  |___|  |_______||___|  |_||_______|
-
+/* _______  __   __  ___  _______  __  _______    _______  ______   __   __  _______  __    _  _______  __   __  ______    _______
+|       ||  | |  ||   ||   _   ||  ||       |  |   _   ||      | |  | |  ||       ||  |  | ||       ||  | |  ||    _ |  |       |
+|  _____||  |_|  ||   ||  |_|  ||__||  _____|  |  |_|  ||  _    ||  |_|  ||    ___||   |_| ||_     _||  | |  ||   | ||  |    ___|
+| |_____ |       ||   ||       |    | |_____   |       || | |   ||       ||   |___ |       |  |   |  |  |_|  ||   |_||_ |   |___
+|_____  ||       ||   ||       |    |_____  |  |       || |_|   ||       ||    ___||  _    |  |   |  |       ||    __  ||    ___|
+ _____| ||   _   ||   ||   _   |     _____| |  |   _   ||       | |     | |   |___ | | |   |  |   |  |       ||   |  | ||   |___
+|_______||__| |__||___||__| |__|    |_______|  |__| |__||______|   |___|  |_______||_|  |__|  |___|  |_______||___|  |_||_______|
 */
 
 package main
@@ -68,11 +67,14 @@ func (b *buffer) clearBuffer(fillChar string) {
 	}
 }
 
-func (b *buffer) clearScreen() {
+func (b *buffer) clearScreen(rep byte) {
 	c := exec.Command("clear")
 	c.Stdout = os.Stdout
 	c.Run()
 	fmt.Printf("\033[39m\033[49m\n")
+	if rep > 0 {
+		b.clearScreen(rep - 1)
+	}
 }
 
 func dl() {
@@ -84,10 +86,10 @@ func (b *buffer) drawFrame() {
 	for x = 1; x < xSize; x++ {
 		for y = 1; y < ySize; y++ {
 			fmt.Printf("%v", b.cells[x][y])
-			time.Sleep(1 * time.Millisecond)
+			//	time.Sleep(50 * time.Microsecond)
 		}
 		fmt.Printf("\n")
-		time.Sleep(1 * time.Millisecond)
+		//	time.Sleep(50 * time.Microsecond)
 	}
 
 }
@@ -105,53 +107,74 @@ func (b *buffer) fillCells(xStarting, xEnding, yStarting, yEnding byte, fillChar
 	//b.cells[x][y] = endChar
 }
 
-func (b *buffer) outline(width, height byte, color string, borderchar string) {
-	var x, y byte = 1, 1
-	for y = 1; y < height-1; y++ { // Draw top line, left-right
+func (b *buffer) outline(xVertex, yVertex, width, height, thickness byte, color string, borderchar string) {
+	var x, y byte = xVertex, yVertex
+	for y = yVertex; y < height-1; y++ { // Draw top line, left-right
 		b.cells[x][y] = fmt.Sprintf("%v%v%v", color, borderchar, d)
 	}
-	b.cells[x][y] = fmt.Sprintf("%v%v", d) // Prevent color from bleeding
+	b.cells[x][y] = fmt.Sprintf("%v", d) // Prevent color from bleeding
 
-	for x = 0; x < width-1; x++ { // Cursor's on the right; draw right line top-bottom
+	for x = xVertex; x < width-1; x++ { // Cursor's on the right; draw right line top-bottom
 		b.cells[x][y] = fmt.Sprintf("%v%v%v%v", color, borderchar, borderchar, d)
 	}
 	b.cells[x][y] = fmt.Sprintf("%v%v%v", borderchar, borderchar, d) // Anti-bleed
 
-	for y = height - 1; y > 0; y-- { // Now we're at the bottom. Draw bottom line, right to left.
+	for y = height - 1; y > yVertex; y-- { // Now we're at the bottom. Draw bottom line, right to left.
 		b.cells[x][y] = fmt.Sprintf("%v%v", color, borderchar)
 	}
-	b.cells[x][y] = fmt.Sprintf("%v%v", d) // it's not really necessary, but anti-bleed
+	b.cells[x][y] = fmt.Sprintf("%v", d) // it's not really necessary, but anti-bleed
 	//x, y = 1, 1
-	x, y = 1, 1                   //reset "cursor"
-	for x = 1; x < width-1; x++ { // left line, top-bottom
+	x, y = xVertex, yVertex             //reset "cursor"
+	for x = xVertex; x < width-1; x++ { // left line, top-bottom
 		b.cells[x][y] = fmt.Sprintf("%v%v%v%v", color, borderchar, borderchar, d)
 	}
 	b.cells[x][y] = fmt.Sprintf("%v%v%v", color, borderchar, d) //anti-bleed, just out of habit
+	if thickness > 1 {
+		b.outline(xVertex-1, yVertex-1, width-1, height-1, thickness-1, color, borderchar)
+	}
+}
+
+func (b *buffer) stringBuffer(xpos, ypos byte, direction rune, inputString string) {
+	var x, y byte = xpos, ypos
+	//	fmt.Println(inputString)
+
+	for a, z := range inputString {
+		if direction == 'v' {
+			b.cells[x+byte(a)][y] = string(z)
+		} else {
+			b.cells[x][y+byte(a)] = string(z)
+		}
+	}
 }
 
 const (
-	line1 string = ""
-	line2 string = ""
-	line3 string = ""
-	line4 string = ""
-	line5 string = ""
-	line6 string = ""
-	line7 string = ""
-	line8 string = ""
+	line1 string = " _______  __   __  ___  _______  __  _______    _______  ______   __   __  _______  __    _  _______  __   __  ______    _______ "
+	line2 string = "|       ||  | |  ||   ||   _   ||  ||       |  |   _   ||      | |  | |  ||       ||  |  | ||       ||  | |  ||    _ |  |       |"
+	line3 string = "|  _____||  |_|  ||   ||  |_|  ||__||  _____|  |  |_|  ||  _    ||  |_|  ||    ___||   |_| ||_     _||  | |  ||   | ||  |    ___|"
+	line4 string = "| |_____ |       ||   ||       |    | |_____   |       || | |   ||       ||   |___ |       |  |   |  |  |_|  ||   |_||_ |   |___ "
+	line5 string = "|_____  ||       ||   ||       |    |_____  |  |       || |_|   ||       ||    ___||  _    |  |   |  |       ||    __  ||    ___|"
+	line6 string = " _____| ||   _   ||   ||   _   |     _____| |  |   _   ||       | |     | |   |___ | | |   |  |   |  |       ||   |  | ||   |___ "
+	line7 string = "|_______||__| |__||___||__| |__|    |_______|  |__| |__||______|   |___|  |_______||_|  |__|  |___|  |_______||___|  |_||_______|"
 )
 
 func main() {
-	var bgc string = fmt.Sprintf("%v ", c)
+	var bgc string = fmt.Sprintf("%v ", m)
 	var mainbuffer buffer
-	mainbuffer.clearScreen()
+	mainbuffer.clearScreen(2)
 	mainbuffer.init(bgc)
-	mainbuffer.clearScreen()
 	mainbuffer.clearBuffer(bgc)
-	bgc = fmt.Sprintf("%v ", a)
-	//	mainbuffer.fillCells(8, 18, 9, 18, fmt.Sprintf("%v%v", gr, bgc), fmt.Sprintf("%v%v", d, bgc))
-	//	mainbuffer.fillCells(2, 8, 18, 23, fmt.Sprintf("%v%v", w, bgc), fmt.Sprintf("%v%v", d, bgc))
-	mainbuffer.fillCells(3, 5, 3, 5, fmt.Sprintf("%v%v", gr, bgc), fmt.Sprintf("%v%v", d, bgc))
-	mainbuffer.fillCells(10, 22, 8, 27, fmt.Sprintf("%v%v", r, bgc), fmt.Sprintf("%v%v", d, bgc))
-	mainbuffer.outline(xSize, ySize, w, " ")
+	mainbuffer.outline(1, 1, xSize, ySize, 1, w, " ")
+	mainbuffer.fillCells(10, 22, 8, 27, fmt.Sprintf("%v ", r), fmt.Sprintf("%v%v", d, bgc))
+	// mainbuffer.stringBuffer(5, 5, 'h', "ayy")
 	mainbuffer.drawFrame()
+	time.Sleep(1000 * time.Millisecond)
+	/*
+		bgc = fmt.Sprintf("%v ", c)
+		mainbuffer.clearScreen(3)
+		mainbuffer.clearBuffer(fmt.Sprintf("%v ", gr))
+		mainbuffer.outline(1, 1, xSize, ySize, 1, w, " ")
+		mainbuffer.fillCells(7, 13, 20, 40, fmt.Sprintf("%v %v", b, gr), fmt.Sprintf("%v%v ", d, gr))
+		mainbuffer.stringBuffer(20, 50, 'v', "lmao")
+		mainbuffer.drawFrame()
+	*/
 }
