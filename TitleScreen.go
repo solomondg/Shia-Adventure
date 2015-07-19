@@ -28,6 +28,61 @@ const (
 	b_default string = "\033[49m"
 )
 
+var shiagreyscale_source = []string{
+
+	"00000000111111111110000000000000",
+	"00000001111111111110000000000000",
+	"00000011111111001110000000000000",
+	"00000001111000000011000000000000",
+	"00000111100000000001000000000000",
+	"00000111100000000001100000000000",
+	"00000111100000000001100000000000",
+	"00001111100000000001100000000000",
+	"00000111100000000001110000000000",
+	"00000111011100001110110000000000",
+	"00011111110010000001110000000000",
+	"00000111101110011110110000000000",
+	"00000111010101000010110000000000",
+	"00001010000000000000111000000000",
+	"00001010000000000000000000000000",
+	"00001001000000000000101100000000",
+	"00001101000000000000100100000000",
+	"00001111000001110000101110000000",
+	"00011111100011010000111110000000",
+	"00001111100111111100111111000000",
+	"00111111101111111101111110000000",
+	"00111111111001010111111100000000",
+	"01111111111000100011111000000000",
+	"01111111111001100111111000000000",
+	"01111111111111110111111100000000",
+	"00111111111111111111111100000000",
+	"00111111111111111111111100000000",
+	"00011111011111111111111000000000",
+	"00011111011111111111110000000000",
+	"00001111001111011101110000000000",
+	"00011111000111110001110000000000",
+	"00111111000000000001111000000000",
+}
+
+func sourcetoarray(input []string) [32][32]byte {
+	var array [32][32]byte
+	xPos, yPos := 0, 0
+	xPos += 1
+	yPos += 1
+	for xPos, x := range input {
+		for yPos, y := range x {
+			array[yPos][xPos] = byte(y)
+		}
+	}
+	return array
+}
+
+func (b *buffer) arrayBuffer(xPos, yPos, xSize, ySize byte, array [][]byte) {
+	for x = xPos; x < xSize; x++ {
+
+	}
+}
+
 var (
 	b  = b_black
 	r  = b_red
@@ -41,8 +96,8 @@ var (
 )
 
 const (
-	xSize = 32
-	ySize = 144
+	xSize = 40
+	ySize = 160
 )
 
 type buffer struct {
@@ -147,28 +202,21 @@ func (b *buffer) stringBuffer(xpos, ypos byte, direction rune, inputString strin
 	}
 }
 
-const (
-	line1 string = " _______  __   __  ___  _______  __  _______    _______  ______   __   __  _______  __    _  _______  __   __  ______    _______ "
-	line2 string = "|       ||  | |  ||   ||   _   ||  ||       |  |   _   ||      | |  | |  ||       ||  |  | ||       ||  | |  ||    _ |  |       |"
-	line3 string = "|  _____||  |_|  ||   ||  |_|  ||__||  _____|  |  |_|  ||  _    ||  |_|  ||    ___||   |_| ||_     _||  | |  ||   | ||  |    ___|"
-	line4 string = "| |_____ |       ||   ||       |    | |_____   |       || | |   ||       ||   |___ |       |  |   |  |  |_|  ||   |_||_ |   |___ "
-	line5 string = "|_____  ||       ||   ||       |    |_____  |  |       || |_|   ||       ||    ___||  _    |  |   |  |       ||    __  ||    ___|"
-	line6 string = " _____| ||   _   ||   ||   _   |     _____| |  |   _   ||       | |     | |   |___ | | |   |  |   |  |       ||   |  | ||   |___ "
-	line7 string = "|_______||__| |__||___||__| |__|    |_______|  |__| |__||______|   |___|  |_______||_|  |__|  |___|  |_______||___|  |_||_______|"
+var (
+	s     string = fmt.Sprintf("%v %v", g, d)
+	line1 string = fmt.Sprintf(" _______  __   __  ___  _______  __  _______    _______  ______   __   __  _______  __    _  _______  __   __  ______    _______ ")
+	line2 string = fmt.Sprintf("|       ||  | |  ||   ||   _   ||  ||       |  |   _   ||      | |  | |  ||       ||  |  | ||       ||  | |  ||    _ |  |       |")
+	line3 string = fmt.Sprintf("|  _____||  |_|  ||   ||  |_|  ||__||  _____|  |  |_|  ||  _    ||  |_|  ||    ___||   |_| ||_     _||  | |  ||   | ||  |    ___|")
+	line4 string = fmt.Sprintf("| |_____ |       ||   ||       |    | |_____   |       || | |   ||       ||   |___ |       |  |   |  |  |_|  ||   |_||_ |   |___ ")
+	line5 string = fmt.Sprintf("|_____  ||       ||   ||       |    |_____  |  |       || |_|   ||       ||    ___||  _    |  |   |  |       ||    __  ||    ___|")
+	line6 string = fmt.Sprintf(" _____| ||   _   ||   ||   _   |     _____| |  |   _   ||       | |     | |   |___ | | |   |  |   |  |       ||   |  | ||   |___ ")
+	line7 string = fmt.Sprintf("|_______||__| |__||___||__| |__|    |_______|  |__| |__||______|   |___|  |_______||_|  |__|  |___|  |_______||___|  |_||_______|")
 )
 
-func (b *buffer) titleDraw(top byte) {
-	//var x byte
-	/*
-		for x = 0; x < line; x++ {
-			defer b.stringBuffer(x+2, 8, 'h', titleLines[x])
-		}
-	*/
-
-	b.stringBuffer(2, 8, 'h', titleLines[top])
-	if top != 0 {
-		b.titleDraw(top - 1)
-
+func (b *buffer) titleDraw(topLine byte, starting byte) {
+	defer b.stringBuffer((2-topLine)+starting, 8, 'h', titleLines[6-topLine])
+	if topLine > 0 {
+		b.titleDraw(topLine-1, starting)
 	}
 }
 
@@ -190,19 +238,21 @@ func main() {
 	//mainbuffer.fillCells(10, 22, 8, 27, fmt.Sprintf("%v ", r), fmt.Sprintf("%v%v", d, bgc))
 	// mainbuffer.stringBuffer(5, 5, 'h', "ayy")
 
-	//	var z byte
-	//	for z = 0; z < 7; z++ {
-	//		mainbuffer.clearBuffer(bgc)
-	//		mainbuffer.outline(1, 1, xSize, ySize, 1, w, " ")
-	//		mainbuffer.titleDraw(z)
-	//		dl(100)
-	//		mainbuffer.clrDrw(3)
-	//	}
+	var z, x byte
+	x = 0
+	for z = 0; z < 7; z++ {
+		mainbuffer.clearBuffer(bgc)
+		mainbuffer.outline(1, 1, xSize, ySize, 1, w, " ")
+		mainbuffer.titleDraw(z, x)
+		x++
+		dl(500)
+		mainbuffer.clrDrw(1)
+	}
 
-	mainbuffer.outline(1, 1, xSize, ySize, 1, w, " ")
-	mainbuffer.titleDraw(2)
-	mainbuffer.clearScreen(2)
-	mainbuffer.drawFrame()
+	//	mainbuffer.outline(1, 1, xSize, ySize, 1, w, " ")
+	//	mainbuffer.titleDraw(5)
+	//	mainbuffer.clearScreen(2)
+	//	mainbuffer.drawFrame()
 	/*
 		bgc = fmt.Sprintf("%v ", c)
 		mainbuffer.clearScreen(3)
