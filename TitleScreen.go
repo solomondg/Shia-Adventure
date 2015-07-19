@@ -42,7 +42,7 @@ var (
 
 const (
 	xSize = 32
-	ySize = 108
+	ySize = 144
 )
 
 type buffer struct {
@@ -77,8 +77,8 @@ func (b *buffer) clearScreen(rep byte) {
 	}
 }
 
-func dl() {
-	time.Sleep(500 * time.Millisecond)
+func dl(t float32) {
+	time.Sleep(time.Duration(t) * time.Millisecond)
 }
 
 func (b *buffer) drawFrame() {
@@ -157,17 +157,52 @@ const (
 	line7 string = "|_______||__| |__||___||__| |__|    |_______|  |__| |__||______|   |___|  |_______||_|  |__|  |___|  |_______||___|  |_||_______|"
 )
 
+func (b *buffer) titleDraw(top byte) {
+	//var x byte
+	/*
+		for x = 0; x < line; x++ {
+			defer b.stringBuffer(x+2, 8, 'h', titleLines[x])
+		}
+	*/
+
+	b.stringBuffer(2, 8, 'h', titleLines[top])
+	if top != 0 {
+		b.titleDraw(top - 1)
+
+	}
+}
+
+func (b *buffer) clrDrw(rep byte) {
+	b.clearScreen(rep)
+	b.drawFrame()
+}
+
+var (
+	bgc        string = fmt.Sprintf("%v ", g)
+	mainbuffer buffer
+	titleLines [7]string = [7]string{line1, line2, line3, line4, line5, line6, line7}
+)
+
 func main() {
-	var bgc string = fmt.Sprintf("%v ", m)
-	var mainbuffer buffer
 	mainbuffer.clearScreen(2)
 	mainbuffer.init(bgc)
 	mainbuffer.clearBuffer(bgc)
-	mainbuffer.outline(1, 1, xSize, ySize, 1, w, " ")
-	mainbuffer.fillCells(10, 22, 8, 27, fmt.Sprintf("%v ", r), fmt.Sprintf("%v%v", d, bgc))
+	//mainbuffer.fillCells(10, 22, 8, 27, fmt.Sprintf("%v ", r), fmt.Sprintf("%v%v", d, bgc))
 	// mainbuffer.stringBuffer(5, 5, 'h', "ayy")
+
+	//	var z byte
+	//	for z = 0; z < 7; z++ {
+	//		mainbuffer.clearBuffer(bgc)
+	//		mainbuffer.outline(1, 1, xSize, ySize, 1, w, " ")
+	//		mainbuffer.titleDraw(z)
+	//		dl(100)
+	//		mainbuffer.clrDrw(3)
+	//	}
+
+	mainbuffer.outline(1, 1, xSize, ySize, 1, w, " ")
+	mainbuffer.titleDraw(2)
+	mainbuffer.clearScreen(2)
 	mainbuffer.drawFrame()
-	time.Sleep(1000 * time.Millisecond)
 	/*
 		bgc = fmt.Sprintf("%v ", c)
 		mainbuffer.clearScreen(3)
